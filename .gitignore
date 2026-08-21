@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.venv/
+.ipynb_checkpoints/
+# Generated analysis outputs are committed for reproducibility.
+.env
+.vscode/
+.idea/
