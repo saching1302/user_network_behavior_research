@@ -6,14 +6,20 @@ venv/
 env/
 .DS_Store
 
+# Keep project data folders but ignore raw downloaded data archives
+# unless you want to commit generated artifacts.
 data/*
 !data/.gitkeep
 
 results/*
 !results/.gitkeep
+!results/*.csv
+!results/*.md
+!results/*.png
 
 figures/*
 !figures/.gitkeep
+!figures/*.png
 
 *.joblib
 *.pkl

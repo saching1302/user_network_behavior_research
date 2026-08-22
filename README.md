@@ -1,24 +1,26 @@
 # Data-Driven Decision Intelligence with Uncertainty-Calibrated AI
 
-## Proposed short communication title
+A public research project exploring whether probability calibration can improve a decision system that is allowed to predict or defer to human review.
 
-**Data-Driven Decision Intelligence with Uncertainty-Calibrated AI: Learning When to Predict and When to Defer**
+## Project goal
 
-## Core research question
+The project tests whether calibrated predictive uncertainty helps separate:
 
-Can probability calibration improve an AI decision system's ability to determine
-when a prediction is sufficiently reliable for automation and when a case should
-be deferred for human review?
+- cases that are reliable for automated prediction,
+- cases that should be deferred for human review,
+- and the trade-off between accuracy, coverage, and decision utility.
 
-## Experiment
+## Research question
 
-The project compares:
+Can probability calibration improve an AI decision system's ability to determine when a prediction is sufficiently reliable for automation and when a case should be deferred for human review?
+
+## Methods compared
 
 - Random Forest
 - XGBoost
 - Sigmoid-calibrated XGBoost
 
-The main evaluation covers:
+## Evaluation metrics
 
 - Accuracy
 - Balanced accuracy
@@ -37,12 +39,9 @@ The main evaluation covers:
 
 ## Dataset
 
-UCI Bank Marketing dataset.
+This project uses the UCI Bank Marketing dataset.
 
-The target is whether a customer subscribes to a term deposit.
-
-The `duration` feature is removed because it is not fully known before the
-outcome of the call and could cause unrealistic leakage for pre-decision use.
+The target is whether a customer subscribes to a term deposit. The `duration` feature is intentionally removed because it is not fully known before the outcome of the call and could create unrealistic leakage in a pre-decision setting.
 
 ## Predict-or-defer policy
 
@@ -57,16 +56,31 @@ else:
     DEFER TO HUMAN REVIEW
 ```
 
-## Run on RunPod
+## Repository structure
 
-### 1. Unzip and enter the repository
-
-```bash
-unzip data-driven-decision-intelligence.zip
-cd data-driven-decision-intelligence
+```text
+.
+├── README.md
+├── requirements.txt
+├── run_all.bat
+├── run_all.sh
+├── data/
+├── results/
+├── figures/
+├── src/
+└── LICENSE
 ```
 
-### 2. Create a virtual environment (recommended)
+## Quick start
+
+### 1. Clone or download the repository
+
+```bash
+git clone https://github.com/saching1302/user_network_behavior_research.git
+cd user_network_behavior_research
+```
+
+### 2. Create a virtual environment
 
 ```bash
 python -m venv .venv
@@ -92,56 +106,49 @@ python src/download_data.py
 python src/experiment.py
 ```
 
-## Outputs
+Or on Windows, simply run:
 
-The experiment produces:
+```bat
+run_all.bat
+```
+
+## Generated outputs
 
 ### Results
 
-- `results/dataset_summary.csv`
-- `results/model_metrics.csv`
-- `results/calibration_metrics.csv`
-- `results/selective_prediction.csv`
-- `results/threshold_analysis.csv`
-- `results/best_decision_policy.csv`
+- results/dataset_summary.csv
+- results/model_metrics.csv
+- results/calibration_metrics.csv
+- results/selective_prediction.csv
+- results/threshold_analysis.csv
+- results/best_decision_policy.csv
+- results/experiment_output.md
 
 ### Figures
 
-- `figures/calibration_curve.png`
-- `figures/coverage_risk_curve.png`
-- `figures/coverage_accuracy_curve.png`
-- `figures/threshold_utility.png`
-- `figures/confusion_matrix.png`
+- figures/calibration_curve.png
+- figures/coverage_risk_curve.png
+- figures/coverage_accuracy_curve.png
+- figures/threshold_utility.png
+- figures/confusion_matrix.png
 
 ## Main interpretation
 
-Do not focus only on classification accuracy.
+The key contribution is not just classification accuracy, but the comparison between:
 
-The intended research contribution is the comparison between:
-
-1. uncalibrated AI confidence,
-2. calibrated AI confidence,
-3. automatic prediction coverage,
+1. uncalibrated confidence,
+2. calibrated confidence,
+3. prediction coverage,
 4. deferred cases,
 5. error among automatically handled cases, and
 6. decision utility.
 
-The key question is whether calibration enables a better operating point between
-automation and deferral.
-
-## Important scientific wording
-
-The uncertainty in this project is operational uncertainty represented through
-calibrated predictive probabilities.
-
-Do not claim that this experiment fully estimates epistemic uncertainty.
-
-A defensible description is:
-
-> The framework uses calibrated predictive probabilities to quantify operational
-> uncertainty and determine whether an observation should be automatically
-> classified or deferred for additional review.
+This framing supports a practical operational view of uncertainty: calibrated predictive probabilities can be used to decide when it is appropriate to automate a decision and when a case should be escalated for human review.
 
 ## Reproducibility
 
-Random seed: `42`
+Random seed: 42
+
+## License
+
+This project is licensed under the MIT License.

@@ -1,0 +1,2 @@
+method,confidence_threshold,mean_utility,coverage,deferral_rate,selective_accuracy,selective_error
+Calibrated XGBoost,0.55,0.7100327749453751,0.9617625637290604,0.03823743627093955,0.9160671462829736,0.08393285371702641
