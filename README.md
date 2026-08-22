@@ -1,18 +1,19 @@
 # Data-Driven Decision Intelligence with Uncertainty-Calibrated AI
 
-A public research project exploring whether probability calibration can improve a decision system that is allowed to predict or defer to human review.
+![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.6-FF9F1C?logo=scikitlearn&logoColor=white)
+![XGBoost](https://img.shields.io/badge/XGBoost-3.4-0BDA51?logo=xgboost&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 
-## Project goal
+A decision-intelligence project that combines machine learning with calibrated uncertainty to decide when to automatically predict and when to defer to a human reviewer.
 
-The project tests whether calibrated predictive uncertainty helps separate:
+## Short project description
 
-- cases that are reliable for automated prediction,
-- cases that should be deferred for human review,
-- and the trade-off between accuracy, coverage, and decision utility.
+This project studies whether probability calibration improves an AI decision system's ability to determine when a prediction is reliable enough for automation and when a case should be escalated for human review. The workflow compares standard classifiers with a sigmoid-calibrated XGBoost model and evaluates the trade-off between coverage, deferment, selective accuracy, and decision utility.
 
-## Research question
+## Why this matters
 
-Can probability calibration improve an AI decision system's ability to determine when a prediction is sufficiently reliable for automation and when a case should be deferred for human review?
+In real decision systems, the key question is not only whether the model is accurate, but whether its confidence is trustworthy. Poor calibration can cause a model to be overconfident in risky cases. This project evaluates a predict-or-defer policy that uses calibrated probabilities to manage operational uncertainty in a principled way.
 
 ## Methods compared
 
@@ -20,32 +21,50 @@ Can probability calibration improve an AI decision system's ability to determine
 - XGBoost
 - Sigmoid-calibrated XGBoost
 
-## Evaluation metrics
+## Key comparison summary
 
-- Accuracy
-- Balanced accuracy
-- Precision
-- Recall
-- F1-score
-- ROC-AUC
-- Brier score
-- Log loss
-- Expected Calibration Error (ECE)
-- Coverage
-- Deferral rate
-- Selective accuracy
-- Selective error
-- Decision utility
+The final experiment shows that calibration materially improves reliability for decision-making:
 
-## Dataset
+- Random Forest: Accuracy 0.8634, Brier score 0.1396, ECE 0.2429
+- XGBoost: Accuracy 0.8485, Brier score 0.1432, ECE 0.2427
+- Calibrated XGBoost: Accuracy 0.9022, Brier score 0.0749, ECE 0.0148
 
-This project uses the UCI Bank Marketing dataset.
+At the selected policy threshold of 0.55, the calibrated model achieved:
 
-The target is whether a customer subscribes to a term deposit. The `duration` feature is intentionally removed because it is not fully known before the outcome of the call and could create unrealistic leakage in a pre-decision setting.
+- Mean utility: 0.7100
+- Coverage: 0.9618
+- Deferral rate: 0.0382
+- Selective accuracy: 0.9161
+
+This indicates that calibrated uncertainty supports a better operating point between automation and deferral.
+
+## Screenshot gallery
+
+### Calibration curve
+
+![Calibration curve](figures/calibration_curve.png)
+
+### Coverage vs accuracy
+
+![Coverage accuracy curve](figures/coverage_accuracy_curve.png)
+
+### Coverage vs risk
+
+![Coverage risk curve](figures/coverage_risk_curve.png)
+
+### Utility threshold analysis
+
+![Threshold utility](figures/threshold_utility.png)
+
+### Confusion matrix
+
+![Confusion matrix](figures/confusion_matrix.png)
+
+## Dataset and task
+
+This project uses the UCI Bank Marketing dataset. The target is whether a customer subscribes to a term deposit. The `duration` feature is removed because it is not fully known before the call outcome and could otherwise create unrealistic leakage in a decision-support setting.
 
 ## Predict-or-defer policy
-
-For each observation:
 
 ```text
 confidence = max(P(class=0), P(class=1))
@@ -56,31 +75,16 @@ else:
     DEFER TO HUMAN REVIEW
 ```
 
-## Repository structure
-
-```text
-.
-├── README.md
-├── requirements.txt
-├── run_all.bat
-├── run_all.sh
-├── data/
-├── results/
-├── figures/
-├── src/
-└── LICENSE
-```
-
 ## Quick start
 
-### 1. Clone or download the repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/saching1302/user_network_behavior_research.git
 cd user_network_behavior_research
 ```
 
-### 2. Create a virtual environment
+### 2. Create and activate a virtual environment
 
 ```bash
 python -m venv .venv
@@ -106,15 +110,13 @@ python src/download_data.py
 python src/experiment.py
 ```
 
-Or on Windows, simply run:
+On Windows, you can also run:
 
 ```bat
 run_all.bat
 ```
 
-## Generated outputs
-
-### Results
+## Output files
 
 - results/dataset_summary.csv
 - results/model_metrics.csv
@@ -123,27 +125,6 @@ run_all.bat
 - results/threshold_analysis.csv
 - results/best_decision_policy.csv
 - results/experiment_output.md
-
-### Figures
-
-- figures/calibration_curve.png
-- figures/coverage_risk_curve.png
-- figures/coverage_accuracy_curve.png
-- figures/threshold_utility.png
-- figures/confusion_matrix.png
-
-## Main interpretation
-
-The key contribution is not just classification accuracy, but the comparison between:
-
-1. uncalibrated confidence,
-2. calibrated confidence,
-3. prediction coverage,
-4. deferred cases,
-5. error among automatically handled cases, and
-6. decision utility.
-
-This framing supports a practical operational view of uncertainty: calibrated predictive probabilities can be used to decide when it is appropriate to automate a decision and when a case should be escalated for human review.
 
 ## Reproducibility
 
