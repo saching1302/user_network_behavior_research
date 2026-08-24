@@ -1,0 +1,129 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{array}
+
+\title{Data-Driven Decision Intelligence with Uncertainty-Calibrated AI:\\ Learning When to Predict and When to Defer}
+
+\author{\IEEEauthorblockN{Sachi N.}
+\IEEEauthorblockA{Independent Research Project\\
+Email: saching1302@example.com}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Machine-learning systems used in operational decision-making must estimate not only a class label but also whether that label is reliable enough to automate. This paper evaluates a predict-or-defer framework on the UCI Bank Marketing dataset. Random Forest, XGBoost, and sigmoid-calibrated XGBoost are compared using discrimination, probability-quality, and selective-decision metrics. The outcome variable indicates whether a customer subscribed to a term deposit, and the call-duration feature is removed to avoid post-outcome leakage. Although calibration does not materially change ranking performance, sigmoid calibration improves the XGBoost Brier score from 0.1432 to 0.0749 and Expected Calibration Error from 0.2427 to 0.0148. Under a confidence threshold of 0.55, calibrated XGBoost attains 0.9618 coverage, 0.9161 selective accuracy, and mean decision utility of 0.7100. The results support calibrated predictive probabilities as an operational mechanism for routing lower-confidence cases to human review; they do not constitute a complete estimate of epistemic or aleatoric uncertainty.
+\end{abstract}
+
+\begin{IEEEkeywords}
+probability calibration, selective classification, human review, uncertainty, decision intelligence, bank marketing
+\end{IEEEkeywords}
+
+\section{Introduction}
+Automated decision systems are often evaluated with accuracy or area under the ROC curve. These metrics are useful, but they do not directly answer an operational question: when should a system act automatically, and when should it defer a case to a human reviewer? A model can rank examples effectively while producing probabilities that are poorly aligned with observed frequencies. Such overconfident probabilities are particularly problematic when prediction errors have a larger cost than review.
+
+This work studies a simple predict-or-defer policy based on calibrated predictive probabilities. The contribution is an empirical comparison of uncalibrated and calibrated models on a public binary-classification task, with evaluation extending beyond classification performance to Brier score, log loss, calibration error, coverage, selective error, and decision utility. The experiment is intentionally framed as operational predictive uncertainty rather than a complete decomposition of uncertainty sources.
+
+\section{Related Work}
+Calibration methods transform model scores into probabilities that better reflect empirical event frequencies. Platt scaling uses a parametric sigmoid mapping \cite{platt1999}; isotonic regression provides a non-parametric alternative. Reliability and calibration behavior have been studied across common classifiers by Niculescu-Mizil and Caruana \cite{niculescu2005}. Modern neural-network analyses also show that high accuracy does not guarantee well-calibrated confidence \cite{guo2017}.
+
+Selective classification adds a reject or abstain option to classification, allowing a system to trade coverage for lower error. This paper applies that idea to a practical human-review setting: cases below a confidence threshold are deferred, while cases above it are automatically classified.
+
+\section{Data and Experimental Design}
+\subsection{Dataset}
+The experiment uses the UCI Bank Marketing dataset \cite{moro2014}, containing 41,188 observations and 20 original columns. The binary target is whether the customer subscribed to a term deposit. The `duration' variable is removed because it is measured during the call and is not available before the outcome is known. The resulting design matrix contains 19 predictors, including numerical and categorical variables.
+
+The positive class contains 4,640 observations (11.27\%), while the negative class contains 36,548 observations. A stratified 80/20 split produces 32,950 training rows and 8,238 untouched test rows. The random seed is 42.
+
+\subsection{Models and Calibration}
+The comparison includes a class-weighted Random Forest, class-weighted XGBoost, and a sigmoid-calibrated XGBoost model. Categorical variables are one-hot encoded; numerical variables are median-imputed. The calibrated model fits a sigmoid mapping on calibration predictions and evaluates the transformed probabilities on the test set.
+
+\subsection{Predict-or-Defer Policy}
+For an observation $x$, let $p(x)$ be the predicted probability of the positive class. The model confidence is
+\begin{equation}
+ c(x)=\max\{p(x),1-p(x)\}.
+\end{equation}
+The policy predicts when $c(x)\geq\tau$ and defers otherwise. The threshold $\tau$ is selected by searching thresholds from 0.50 to 0.95. Utility is defined as +1 for a correct automatic prediction, -2 for an incorrect automatic prediction, and -0.25 for a deferred case.
+
+\subsection{Metrics}
+In addition to accuracy, balanced accuracy, precision, recall, F1, and ROC-AUC, probability quality is measured with the Brier score, log loss, and Expected Calibration Error (ECE). For selective evaluation, coverage is the fraction of cases predicted automatically, deferral rate is one minus coverage, and selective accuracy is accuracy among non-deferred cases.
+
+\section{Results}
+Table~\ref{tab:models} reports the test-set model metrics. Calibration substantially improves probability quality for XGBoost: ECE decreases by 0.2279 and the Brier score decreases by 0.0683. ROC-AUC remains nearly unchanged, which is expected because a monotonic calibration mapping preserves ranking.
+
+\begin{table}[t]
+\caption{Test-set model and probability metrics}
+\label{tab:models}
+\centering
+\footnotesize
+\begin{tabular}{lrrrrr}
+\toprule
+Model & Acc. & Bal. Acc. & F1 & ROC-AUC & ECE \\
+\midrule
+Random Forest & 0.8634 & 0.7641 & 0.5119 & 0.8134 & 0.2429 \\
+XGBoost & 0.8485 & 0.7608 & 0.4906 & 0.8108 & 0.2427 \\
+Calibrated XGBoost & 0.9022 & 0.6114 & 0.3521 & 0.8126 & 0.0148 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\caption{Probability quality}
+\label{tab:probability}
+\centering
+\footnotesize
+\begin{tabular}{lrr}
+\toprule
+Model & Brier score & Log loss \\
+\midrule
+Random Forest & 0.1396 & 0.4575 \\
+XGBoost & 0.1432 & 0.4656 \\
+Calibrated XGBoost & 0.0749 & 0.2652 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:policy} gives the selected decision policy. Calibrated XGBoost predicts automatically for 96.18\% of test observations and defers 3.82\%. Among automatically handled cases, accuracy is 91.61\%, with mean utility 0.7100.
+
+\begin{table}[t]
+\caption{Best predict-or-defer policy}
+\label{tab:policy}
+\centering
+\footnotesize
+\begin{tabular}{lr}
+\toprule
+Metric & Value \\
+\midrule
+Method & Calibrated XGBoost \\
+Confidence threshold & 0.55 \\
+Mean utility & 0.7100 \\
+Coverage & 0.9618 \\
+Deferral rate & 0.0382 \\
+Selective accuracy & 0.9161 \\
+Selective error & 0.0839 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Discussion}
+The experiment demonstrates why calibration should be evaluated separately from ranking performance. Uncalibrated XGBoost and calibrated XGBoost have similar ROC-AUC values, but their probability quality differs considerably. The calibrated model therefore provides a more meaningful confidence signal for a threshold-based routing policy. The selected operating point retains high automation coverage while assigning a small fraction of cases to human review.
+
+The calibrated model's lower recall and F1 at the default classification boundary should also be interpreted carefully. Calibration changes the probability scale and the thresholding behavior; it is not designed to optimize every label metric simultaneously. In this setting, the objective is a cost-sensitive decision policy rather than a single default-boundary classification score.
+
+\section{Limitations}
+The evaluation uses one stratified train/test split and one random seed, so uncertainty in the reported estimates is not fully characterized. The utility values are illustrative and should be replaced with domain-validated costs before deployment. The UCI dataset is historical and may not represent current customers or other institutions. Finally, calibrated predictive probabilities represent operational uncertainty in this study; the analysis does not identify epistemic and aleatoric components separately.
+
+\section{Conclusion}
+A predict-or-defer system benefits from probability calibration when confidence is used to decide whether to automate or escalate. On the UCI Bank Marketing task, sigmoid calibration reduced XGBoost ECE from 0.2427 to 0.0148 and Brier score from 0.1432 to 0.0749. The selected policy achieved 0.9618 coverage and 0.9161 selective accuracy at a 0.55 confidence threshold. These findings motivate evaluating calibration and selective decision utility alongside conventional classification metrics.
+
+\begin{thebibliography}{00}
+\bibitem{platt1999} J. Platt, ``Probabilistic outputs for support vector machines and comparisons to regularized likelihood methods,'' in \emph{Advances in Large Margin Classifiers}, 1999, pp. 61--74.
+\bibitem{niculescu2005} A. Niculescu-Mizil and R. Caruana, ``Predicting good probabilities with supervised learning,'' in \emph{Proc. ICML}, 2005, pp. 625--632.
+\bibitem{guo2017} C. Guo, G. Pleiss, Y. Sun, and K. Q. Weinberger, ``On calibration of modern neural networks,'' in \emph{Proc. ICML}, 2017, pp. 1321--1330.
+\bibitem{moro2014} S. Moro, P. Cortez, and P. Rita, ``A data-driven approach to predict the success of bank telemarketing,'' \emph{Decision Support Systems}, vol. 62, pp. 22--31, 2014.
+\end{thebibliography}
+
+\end{document}

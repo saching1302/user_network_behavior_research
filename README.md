@@ -126,6 +126,10 @@ run_all.bat
 - results/best_decision_policy.csv
 - results/experiment_output.md
 
+## Research paper
+
+- [IEEE-format manuscript](paper/ieee_paper.tex)
+
 ## Reproducibility
 
 Random seed: 42
